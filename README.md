@@ -10,3 +10,6 @@
 > Then deletes itself as is no longer needed
 
 ![image](https://github.com/user-attachments/assets/3d36ccde-8a76-4fa4-8adb-d50e99f17623)
+
+### Disclaimer:
+*If I ever wanted any "telemetry" from user, this is it*
