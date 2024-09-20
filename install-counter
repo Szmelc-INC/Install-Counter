@@ -1,0 +1,60 @@
+#!/bin/bash
+
+# This script logs each new installation of Entropy Linux
+# It creates unique ID for new installed Entropies, then sends it once over Discord webhook in form:
+
+# Build: [System Version]
+# UUID: [System ID]
+# Date & Time
+
+# Then deletes itself as is no longer needed
+# More info on: https://github.com/Szmelc-INC/Install-Counter/
+
+# Config
+UUID_FILE="/etc/.system-uuid"
+BUILD_FILE="/etc/.entropy-build"
+WEBHOOK_URL="<URL>"
+
+# Check if running as root
+if [ "$EUID" -ne 0 ]; then
+  echo "Please run as root"
+  exit 1
+fi
+
+# Check if the entropy build file exists and is not empty
+if [ -s "$BUILD_FILE" ]; then
+  # Read the existing build info from the file
+  BUILD=$(cat "$BUILD_FILE")
+else
+  echo "Build information not found in $BUILD_FILE. Please create the file and add the build information."
+  exit 1
+fi
+
+# Check if the UUID file exists and is not empty
+if [ -s "$UUID_FILE" ]; then
+  # Read the existing UUID
+  UUID=$(cat "$UUID_FILE")
+  echo "Existing UUID found: $UUID"
+else
+  # Generate a new UUID using $RANDOM if the file doesn't exist or is empty
+  UUID="$RANDOM-$RANDOM-$RANDOM-$RANDOM"
+  echo "$UUID" > "$UUID_FILE"
+  echo "New UUID generated and saved: $UUID"
+fi
+
+# Get current date and time
+DATE_TIME=$(date)
+
+# Prepare the Discord webhook payloadPAYLOAD=$(cat <<EOF
+{
+  "content": "# New Entropy Installed!\n\`\`\`bash\nBuild: $BUILD\nUUID: $UUID\n$DATE_TIME\n\`\`\`"
+}
+EOF
+)
+
+# Send the data to Discord
+curl -H "Content-Type: application/json" -X POST -d "$PAYLOAD" "$WEBHOOK_URL"
+echo "UUID and build information have been processed and sent to Discord."
+
+# Bon voyage
+rm $0
